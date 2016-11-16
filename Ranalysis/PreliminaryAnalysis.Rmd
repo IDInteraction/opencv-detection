@@ -1,0 +1,51 @@
+---
+title: "Preliminary analysis"
+output: html_notebook
+---
+
+```{r}
+library("sqldf")
+library("dplyr")
+
+source("functions.R")
+```
+
+
+Calling modified face classifier with:
+
+`python ./dynamic/face.py /mnt/IDInteraction/dual_screen_free_experiment/video/experiment2_individual_streams/high_quality/front/P01_video.mp4`
+
+
+```{r}
+
+eyedata <- readfeature("../outputeye.csv")
+facedata <- readfeature("../outputface.csv")
+
+totalframes <- 46323 # TODO - detect via ffprobe
+```
+
+Table showing proportion of frames with n faces:
+
+```{r}
+round(countfeatureframe(facedata) / totalframes,3)
+```
+
+
+Table showing number of frames with n eyes:
+
+```{r}
+round(countfeatureframe(eyedata) / totalframes, 3)
+```
+
+
+```{r}
+facevertices <- data.frame(t(apply(facedata, 1, getvertices)))
+
+facemidpoint <- data.frame(t(apply(facedata, 1, getmidpoint)))
+
+
+generateCppMTcsv(facedata, "facedata.csv")
+
+
+```
+
