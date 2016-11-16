@@ -1,8 +1,13 @@
+#!/usr/bin/python
+
 import cv2
 import os
 import csv
+import sys
+
 
 #WINDOW_NAME = 'Detection'
+
 
 face_cascade = cv2.CascadeClassifier('/usr/share/opencv/haarcascades/haarcascade_frontalface_alt2.xml')
 #face_cascade = cv2.CascadeClassifier('/usr/share/opencv/lbpcascades/lbpcascade_frontalface.xml')
@@ -10,7 +15,10 @@ eye_cascade = cv2.CascadeClassifier('/usr/share/opencv/haarcascades/haarcascade_
 #eye_cascade = cv2.CascadeClassifier('/usr/share/opencv/haarcascades/haarcascade_eye_tree_eyeglasses.xml')
 #eye_cascade = cv2.CascadeClassifier('/usr/share/opencv/haarcascades/haarcascade_mcs_eyepair_small.xml')
 #video = cv2.VideoCapture('/opt/windows/idi-test/star_jump.mp4')
-video = cv2.VideoCapture('/mnt/IDInteraction/dual_screen_free_experiment/video/experiment2_individual_streams/high_quality/front/P01_video.mp4')
+#video = cv2.VideoCapture('/mnt/IDInteraction/dual_screen_free_experiment/video/experiment2_individual_streams/high_quality/front/P01_video.mp4')
+
+video = cv2.VideoCapture(sys.argv[1])
+
 #cv2.namedWindow(WINDOW_NAME)
 
 facecsvfile = open('outputface.csv', 'w')
