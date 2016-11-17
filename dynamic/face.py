@@ -11,20 +11,22 @@ import sys
 
 face_cascade = cv2.CascadeClassifier('/usr/share/opencv/haarcascades/haarcascade_frontalface_alt2.xml')
 #face_cascade = cv2.CascadeClassifier('/usr/share/opencv/lbpcascades/lbpcascade_frontalface.xml')
-eye_cascade = cv2.CascadeClassifier('/usr/share/opencv/haarcascades/haarcascade_eye.xml')
+#eye_cascade = cv2.CascadeClassifier('/usr/share/opencv/haarcascades/haarcascade_eye.xml')
 #eye_cascade = cv2.CascadeClassifier('/usr/share/opencv/haarcascades/haarcascade_eye_tree_eyeglasses.xml')
-#eye_cascade = cv2.CascadeClassifier('/usr/share/opencv/haarcascades/haarcascade_mcs_eyepair_small.xml')
+eye_cascade = cv2.CascadeClassifier('/usr/share/opencv/haarcascades/haarcascade_mcs_eyepair_small.xml')
 #video = cv2.VideoCapture('/opt/windows/idi-test/star_jump.mp4')
 #video = cv2.VideoCapture('/mnt/IDInteraction/dual_screen_free_experiment/video/experiment2_individual_streams/high_quality/front/P01_video.mp4')
+
+print sys.argv[1:3]
 
 video = cv2.VideoCapture(sys.argv[1])
 
 #cv2.namedWindow(WINDOW_NAME)
 
-facecsvfile = open('outputface.csv', 'w')
+facecsvfile = open(sys.argv[2], 'w')
 facewriter = csv.writer(facecsvfile)
 
-eyecsvfile = open('outputeye.csv', 'w')
+eyecsvfile = open(sys.argv[3], 'w')
 eyewriter = csv.writer(eyecsvfile)
 
 got, img = video.read()
@@ -47,10 +49,10 @@ while got:
         cv2.rectangle(img, (x, y), (x_w, y_h), (255, 0, 0), 1)
         roi_gray = gray[y:y_h, x:x_w]
 
-        facewriter.writerow([frame, x, y, w, h])        
-        
+        facewriter.writerow([frame, x, y, w, h])
+
         eyes = eye_cascade.detectMultiScale(roi_gray)
-        
+
         for (ex, ey, ew, eh) in eyes:
             cv2.rectangle(img, (x + ex, y + ey), (x + ex + ew, y + ey + eh), (0, 255, 0), 1)
             eyewriter.writerow([frame, ex, ey, ew, eh])
@@ -58,7 +60,7 @@ while got:
 #    cv2.imshow(WINDOW_NAME, img)
 
 
-    
+
  #   if cv2.waitKey(1) & 0xFF == ord('q'):
  #       break
 
