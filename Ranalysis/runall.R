@@ -1,7 +1,28 @@
 library(stringr)
-inputdir <- "/mnt/IDInteraction/dual_screen_free_experiment/video/experiment2_individual_streams/high_quality/front/"
-#inputdir <- "~/opencv/abc-classifier/testdata/"
-outputdir <- "~/opencv/abc-classifier/processall/"
+
+
+checkpath <- function(indir){
+  if(!dir.exists(indir)){
+    stop(paste(indir, "does not exist"))
+  }
+  
+  if(is.na(str_match(indir, "/$"))){
+    indir <- paste0(indir, "/")
+  }
+  
+  return(indir)
+}
+
+
+
+options <- commandArgs(trailingOnly = TRUE)
+if(length(options) != 2){
+  stop("Expecting input and output folders")
+}
+
+inputdir <- checkpath(options[1])
+outputdir <- checkpath(options[2])
+
 
 videofiles <- list.files(inputdir, pattern = "P\\d+_video.mp4$")
 
