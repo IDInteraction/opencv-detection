@@ -43,6 +43,16 @@ getmidpoint <- function(indata){
 }
 
 
+getMultiFaceFrames <- function(framedata){
+  multiface <- sqldf::sqldf("select Frame, count(*) 
+                            from framedata 
+                            group by Frame 
+                            having count(*) >1")$Frame
+  
+  return(multiface)
+  
+}
+
 # Convert the openmp data csv to CppMT format
 generateCppMTcsv <- function(indata, outfile, deltaframe = 20 ){
   
@@ -77,6 +87,16 @@ generateCppMTcsv <- function(indata, outfile, deltaframe = 20 ){
                 "Bounding box vertex 4 X (px)",
                 "Bounding box vertex 4 Y (px)"
   )
+  colnames(outdata) <- colnames
+  
+  twofaced <- getMultiFaceFrames(outdata)
+  
+  # TODO handle these better; ideally want to keep the face nearest the face on the
+  # previous frame
+  if(length(twofaced) > 0){
+    warning(paste(length(twofaced), "frames with >1 face detected.  Dropping all faces from these frames"))
+    outdata <- outdata[-which(outdata$Frame %in% twofaced), ]
+  }
   
   write.table(outdata, file = outfile, col.names = colnames, row.names = FALSE,
               sep=",")
