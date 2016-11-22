@@ -55,14 +55,12 @@ while got:
 
         for (ex, ey, ew, eh) in eyes:
             cv2.rectangle(img, (x + ex, y + ey), (x + ex + ew, y + ey + eh), (0, 255, 0), 1)
-            eyewriter.writerow([frame, ex, ey, ew, eh])
+            eyewriter.writerow([frame, x + ex, x + ey, ew, eh])
 
 #    cv2.imshow(WINDOW_NAME, img)
 
-
-
- #   if cv2.waitKey(1) & 0xFF == ord('q'):
- #       break
+#      if cv2.waitKey(1) & 0xFF == ord('q'):
+#        break
 
     got, img = video.read()
 
