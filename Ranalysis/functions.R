@@ -44,11 +44,13 @@ getmidpoint <- function(indata){
 
 
 getMultiFaceFrames <- function(framedata){
-  multiface <- sqldf::sqldf("select Frame, count(*) 
-                            from framedata 
-                            group by Frame 
-                            having count(*) >1")$Frame
+  # multiface <- sqldf::sqldf("select Frame, count(*) 
+  #                           from framedata 
+  #                           group by Frame 
+  #                           having count(*) >1")$Frame
   
+  freqtab <- as.data.frame(table(framedata$Frame))
+  multiface <- as.integer(freqtab[freqtab$Freq > 1 , 1])
   return(multiface)
   
 }
