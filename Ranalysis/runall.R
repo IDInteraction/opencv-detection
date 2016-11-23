@@ -2,9 +2,10 @@ library(stringr)
 
 
 checkpath <- function(indir){
-  if(!dir.exists(indir)){
-    stop(paste(indir, "does not exist"))
-  }
+# removed since not dir.exists() not available in docker container
+#  if(!dir.exists(indir)){
+#    stop(paste(indir, "does not exist"))
+#  }
   
   if(is.na(str_match(indir, "/$"))){
     indir <- paste0(indir, "/")
@@ -32,7 +33,7 @@ for(v in videofiles){
   facename <- paste0("face", rootname, ".csv")
   eyename <- paste0("eye", rootname, ".csv")
   
-  cmd <- paste0("python ~/opencv/abc-classifier/dynamic/face.py ",
+  cmd <- paste0("python ./opencv/abc-classifier/dynamic/face.py ",
                    inputdir, v, " ",
                    outputdir, facename, " ",
                    outputdir, eyename)
@@ -40,7 +41,7 @@ for(v in videofiles){
   system(cmd)
   
   # convert to Cpp-mt format
-  convertscript <- "~/opencv/abc-classifier/Ranalysis/convertdata.R"
+  convertscript <- "./opencv/abc-classifier/Ranalysis/convertdata.R"
   cmd <- paste0("Rscript ",
                 convertscript,
                 " ",

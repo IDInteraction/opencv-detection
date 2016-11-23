@@ -14,7 +14,7 @@ if (length(args)==0) {
   args[2] = "out.txt"
 }
 
-source("~/opencv/abc-classifier/Ranalysis/functions.R")
+source("./opencv/abc-classifier/Ranalysis/functions.R")
 
 indata <- readfeature(args[1])
 
