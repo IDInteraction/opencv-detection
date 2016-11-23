@@ -29,8 +29,8 @@ videofiles <- list.files(inputdir, pattern = "P\\d+_video.mp4$")
 
 for(v in videofiles){
   rootname <- str_extract(v, "(P\\d+)")
-  facename <- paste0("face", rootname, ".csv")
-  eyename <- paste0("eye", rootname, ".csv")
+  facename <- paste0(rootname, "face",  ".csv")
+  eyename <- paste0(rootname, "eye", ".csv")
   
   cmd <- paste0("python ~/opencv/abc-classifier/dynamic/face.py ",
                    inputdir, v, " ",
@@ -45,7 +45,7 @@ for(v in videofiles){
                 convertscript,
                 " ",
                 outputdir, facename, " ",
-                outputdir, "p", facename)
+                outputdir, facename)
   system(cmd)                 
   
 }
