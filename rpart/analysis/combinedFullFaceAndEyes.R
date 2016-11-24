@@ -25,6 +25,7 @@ formula <- attentionName ~ ffboxHeight +   ffboxRotation + ffboxArea + ffboxWidt
   eyesboxHeight +   eyesboxRotation + eyesboxArea + eyesboxWidth + eyeswidthHeightRatio + eyesboxYcoordRel
 
 allresults <- NULL
+allparticipants <- NULL
 for(p in participants){
   thisparticipantFF <- createTrackingAnnotation(p,
                                                 trackingLoc = "/mnt/IDInteraction/dual_screen_free_experiment/tracking/high_quality/front_full_face/",
@@ -45,6 +46,7 @@ for(p in participants){
                                natural join 
                                thisparticipantFF as f")
 
+  allparticipants <- rbind(allparticipants, combinedparticipant)
   
   for(tt in trainingtimes){
     accuracy <- getAccuracy(getConfusionMatrix(combinedparticipant, trainingtime = tt,
