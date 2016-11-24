@@ -33,8 +33,7 @@ for(v in videofiles){
   rootname <- str_extract(v, "(P\\d+)")
   facename <- paste0(rootname, "face",  ".csv")
   eyename <- paste0(rootname, "eye", ".csv")
-  skipname <- paste0(rootname, "_video.skip")
-  cmd <- paste0("python ./opencv/abc-classifier/dynamic/face.py ",
+  cmd <- paste0("python $IDI_HOME/opencv/abc-classifier/dynamic/face.py ",
                    inputdir, v, " ",
                    outputdir, facename, " ",
                    outputdir, eyename, " ",
@@ -43,7 +42,7 @@ for(v in videofiles){
   system(cmd)
 
   # convert to Cpp-mt format
-  convertscript <- "./opencv/abc-classifier/Ranalysis/convertdata.R"
+  convertscript <- "$IDI_HOME/opencv/abc-classifier/Ranalysis/convertdata.R"
   cmd <- paste0("Rscript ",
                 convertscript,
                 " ",

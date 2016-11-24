@@ -14,6 +14,9 @@ if (length(args)==0) {
   args[2] = "out.txt"
 }
 
+message("In folder")
+message(getwd())
+
 source("./opencv/abc-classifier/Ranalysis/functions.R")
 
 indata <- readfeature(args[1])
