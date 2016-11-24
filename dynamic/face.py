@@ -29,12 +29,26 @@ facewriter = csv.writer(facecsvfile)
 eyecsvfile = open(sys.argv[3], 'w')
 eyewriter = csv.writer(eyecsvfile)
 
+frame = 0
+
+if(len(sys.argv)==5):
+    skipfile = open(sys.argv[4], 'r')
+    skiptime = int(skipfile.readline())
+    skipframe = skiptime / 20 # TODO - don't hard code
+    got, img = video.read()
+    while got:
+        frame = frame + 1
+        got, img = video.read()
+        if(frame > skipframe):
+            break
+
+
 got, img = video.read()
 ox = 0
 oy = 0
 ow, oh, _ = img.shape
 #print ox, oy, ow, oh
-frame = 0
+
 while got:
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     gray_sm = gray[oy:oh, ox:ow]
