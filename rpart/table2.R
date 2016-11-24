@@ -20,14 +20,15 @@ rm(list=ls())
 participants <- getParticipantCodes("~/IDInteraction/tracking-analysis/Rnotebooks/resources/dual_screen_free_experiment/high_quality/front_full_face/")
 trainingtimes <- c(1,2,5,10)
 
+allparticipants <- loadExperimentData(participants,
+                                      trackingLoc = "~/IDInteraction/tracking-analysis/Rnotebooks/resources/dual_screen_free_experiment/high_quality/front_full_face/",
+                                      annoteLoc = "~/IDInteraction/tracking-analysis/Rnotebooks/resources/dual_screen_free_experiment/high_quality/attention/"
+)
+
+
 allresults <- NULL
 for(p in participants){
-  thisparticipant <- createTrackingAnnotation(p,
-                                              trackingLoc = "/mnt/IDInteraction/dual_screen_free_experiment/tracking/high_quality/front_eyes_only/",
-                                              annoteLoc = "~/IDInteraction/tracking-analysis/Rnotebooks/resources/dual_screen_free_experiment/high_quality/attention/"
-  )
-  
-  
+  thisparticipant <- subset(allparticipants, allparticipants$participantCode == p)  
   
   for(tt in trainingtimes){
     accuracy <- getAccuracy(getConfusionMatrix(thisparticipant, trainingtime = tt))
