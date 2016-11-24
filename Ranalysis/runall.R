@@ -33,6 +33,7 @@ for(v in videofiles){
   rootname <- str_extract(v, "(P\\d+)")
   facename <- paste0(rootname, "face",  ".csv")
   eyename <- paste0(rootname, "eye", ".csv")
+  skipname <- paste0(rootname, "_video.skip")
   cmd <- paste0("python $IDI_HOME/opencv/abc-classifier/dynamic/face.py ",
                    inputdir, v, " ",
                    outputdir, facename, " ",
