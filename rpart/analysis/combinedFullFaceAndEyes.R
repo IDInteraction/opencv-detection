@@ -19,38 +19,35 @@ rm(list=ls())
 
 participants <- getParticipantCodes("~/IDInteraction/tracking-analysis/Rnotebooks/resources/dual_screen_free_experiment/high_quality/front_full_face/")
 trainingtimes <- c(1,2,5,10)
-
-
-formula <- attentionName ~ ffboxHeight +   ffboxRotation + ffboxArea + ffboxWidth + ffwidthHeightRatio + ffboxYcoordRel +
+combinedformula <- attentionName ~ ffboxHeight +   ffboxRotation + ffboxArea + ffboxWidth + ffwidthHeightRatio + ffboxYcoordRel +
   eyesboxHeight +   eyesboxRotation + eyesboxArea + eyesboxWidth + eyeswidthHeightRatio + eyesboxYcoordRel
 
-allresults <- NULL
-allparticipants <- NULL
-for(p in participants){
-  thisparticipantFF <- createTrackingAnnotation(p,
-                                                trackingLoc = "/mnt/IDInteraction/dual_screen_free_experiment/tracking/high_quality/front_full_face/",
-                                                annoteLoc = "~/IDInteraction/tracking-analysis/Rnotebooks/resources/dual_screen_free_experiment/high_quality/attention/"
-  )
-  
-  thisparticipantFF <- renameVariables(thisparticipantFF, prefix = "ff")
-  
-  thisparticipantEyes <- createTrackingAnnotation(p,
-                                                  trackingLoc = "/mnt/IDInteraction/dual_screen_free_experiment/tracking/high_quality/front_eyes_only/",
-                                                  annoteLoc = "~/IDInteraction/tracking-analysis/Rnotebooks/resources/dual_screen_free_experiment/high_quality/attention/"
-  )
-  
-  thisparticipantEyes <- renameVariables(thisparticipantEyes, prefix = "eyes")
-  
-  combinedparticipant <- sqldf("select * 
-                               from thisparticipantEyes as e 
-                               natural join 
-                               thisparticipantFF as f")
 
-  allparticipants <- rbind(allparticipants, combinedparticipant)
-  
+
+allparticipantsFF <- loadExperimentData(participants,
+                                        trackingLoc = "/mnt/IDInteraction/dual_screen_free_experiment/tracking/high_quality/front_full_face/",
+                                        annoteLoc = "/mnt/IDInteraction/dual_screen_free_experiment/attention/"
+)
+allparticipantsFF <- renameVariables(allparticipantsFF, prefix = "ff")
+
+allparticipantsEyes <- loadExperimentData(participants, 
+                                          trackingLoc = "/mnt/IDInteraction/dual_screen_free_experiment/tracking/high_quality/front_eyes_only/",
+                                          annoteLoc = "/mnt/IDInteraction/dual_screen_free_experiment/attention/"
+)
+
+allparticipantsEyes <- renameVariables(allparticipantsEyes, prefix = "eyes")
+
+combinedparticipants <- sqldf("select * 
+                               from allparticipantsEyes as e 
+                               natural join 
+                               allparticipantsFF as f")
+
+allresults <- NULL
+for(p in participants){
+  combinedparticipant <- subset(combinedparticipants, combinedparticipants$participantCode == p)
   for(tt in trainingtimes){
     accuracy <- getAccuracy(getConfusionMatrix(combinedparticipant, trainingtime = tt,
-                                               formula = formula))
+                                               formula = combinedformula))
     allresults <- rbind(allresults,
                         data.frame(participant = p,
                                    trainingtime = tt,
@@ -58,9 +55,11 @@ for(p in participants){
     )
   }
   
-  print(p)
+  #print(p)
 }
 
 tableCombined <- sqldf("select trainingtime, avg(accuracy) as avgaccuracy
                        from allresults
                        group by trainingtime")
+
+save(tableCombined, combinedformula, file="tableCombined.RData")

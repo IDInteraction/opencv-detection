@@ -17,13 +17,13 @@ library(sqldf)
 rm(list=ls())
 
 
-participants <- getParticipantCodes("~/IDInteraction/tracking-analysis/Rnotebooks/resources/dual_screen_free_experiment/high_quality/front_full_face/")
+participants <- getParticipantCodes("/mnt/IDInteraction/dual_screen_free_experiment/tracking/high_quality/front_full_face/")
 trainingtimes <- c(1,2,5,10)
+table1formula <- attentionName ~ boxHeight +  boxRotation + boxArea + boxWidth + widthHeightRatio + boxYcoordRel
 
 allparticipants <- loadExperimentData(participants,
-                                      trackingLoc = "~/IDInteraction/tracking-analysis/Rnotebooks/resources/dual_screen_free_experiment/high_quality/front_full_face/",
-                                      annoteLoc = "~/IDInteraction/tracking-analysis/Rnotebooks/resources/dual_screen_free_experiment/high_quality/attention/"
-)
+                                      trackingLoc = "/mnt/IDInteraction/dual_screen_free_experiment/tracking/high_quality/front_full_face/",
+                                      annoteLoc = "/mnt/IDInteraction/dual_screen_free_experiment/attention/")
 
 
 allresults <- NULL
@@ -31,7 +31,8 @@ for(p in participants){
   thisparticipant <- subset(allparticipants, allparticipants$participantCode == p)
   
   for(tt in trainingtimes){
-    accuracy <- getAccuracy(getConfusionMatrix(thisparticipant, trainingtime = tt))
+    accuracy <- getAccuracy(getConfusionMatrix(thisparticipant, trainingtime = tt,
+                                               formula = table1formula))
     allresults <- rbind(allresults, 
                         data.frame(participant = p,
                                    trainingtime = tt,
@@ -39,9 +40,12 @@ for(p in participants){
     )
   }
   
- # print(p)
+  # print(p)
 }
 
 table1 <- sqldf("select trainingtime, avg(accuracy) as avgaccuracy 
                        from allresults
                        group by trainingtime")
+
+
+save(table1, table1formula, file = "table1.RData")

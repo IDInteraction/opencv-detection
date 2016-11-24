@@ -17,20 +17,23 @@ library(sqldf)
 rm(list=ls())
 
 
-participants <- getParticipantCodes("~/IDInteraction/tracking-analysis/Rnotebooks/resources/dual_screen_free_experiment/high_quality/front_full_face/")
+participants <- getParticipantCodes("/mnt/IDInteraction/dual_screen_free_experiment/attention/")[1]
+warning("only using 1st participant")
 trainingtimes <- c(1,2,5,10)
+openCVFormula <- formula(attentionName ~ boxArea + boxXcoordRel + boxYcoordRel)
+allparticipantsOpenCV <- loadExperimentData(participants,
+                                            "~/opencv/abc-classifier/processall/",
+                                            "/mnt/IDInteraction/dual_screen_free_experiment/attention/",
+                                            trackingSuffix = "face.csv")
 
-"~/opencv/abc-classifier/processall/pfaceP03.csv"
 
 allresults <- NULL
 for(p in participants){
-  thisparticipant <- createTrackingAnnotation(p,
-                                              trackingLoc = "~/IDInteraction/tracking-analysis/Rnotebooks/resources/dual_screen_free_experiment/high_quality/front_full_face/",
-                                              annoteLoc = "~/IDInteraction/tracking-analysis/Rnotebooks/resources/dual_screen_free_experiment/high_quality/attention/"
-  )
+  thisparticipant <- subset(allparticipantsOpenCV, allparticipantsOpenCV$participantCode ==p)
   
   for(tt in trainingtimes){
-    accuracy <- getAccuracy(getConfusionMatrix(thisparticipant, trainingtime = tt))
+    accuracy <- getAccuracy(getConfusionMatrix(thisparticipant, trainingtime = tt,
+                                               formula = openCVFormula))
     allresults <- rbind(allresults, 
                         data.frame(participant = p,
                                    trainingtime = tt,
@@ -41,8 +44,11 @@ for(p in participants){
   print(p)
 }
 
-table1 <- sqldf("select trainingtime, avg(accuracy) as avgaccuracy 
+tableOpenCV<- sqldf("select trainingtime, avg(accuracy) as avgaccuracy 
                        from allresults
                        group by trainingtime")
+
+
+save(openCVFormula, tableOpenCV, file = "tableOpenCV.RData")
 
 
