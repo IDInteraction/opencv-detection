@@ -50,5 +50,12 @@ for(v in videofiles){
                 outputdir, facename, " ",
                 outputdir, facename)
   system(cmd)
+  
+  cmd <- paste0("Rscript ",
+                convertscript,
+                " ",
+                outputdir, eyename, " ",
+                outputdir, eyename)
+  system(cmd)
 
 }
