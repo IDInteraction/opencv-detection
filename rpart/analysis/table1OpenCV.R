@@ -17,8 +17,7 @@ library(sqldf)
 rm(list=ls())
 
 
-participants <- getParticipantCodes("/mnt/IDInteraction/dual_screen_free_experiment/attention/")[1]
-warning("only using 1st participant")
+participants <- getParticipantCodes("/mnt/IDInteraction/dual_screen_free_experiment/attention/")
 trainingtimes <- c(1,2,5,10)
 openCVFormula <- formula(attentionName ~ boxArea + boxXcoordRel + boxYcoordRel)
 allparticipantsOpenCV <- loadExperimentData(participants,
@@ -28,7 +27,10 @@ allparticipantsOpenCV <- loadExperimentData(participants,
 
 
 allresults <- NULL
-for(p in participants){
+
+# We exclude participant 9 since a face was almost never detected and so there is
+# insufficient data to train the classifier
+for(p in participants[participants != "P09"]){
   thisparticipant <- subset(allparticipantsOpenCV, allparticipantsOpenCV$participantCode ==p)
   
   for(tt in trainingtimes){
