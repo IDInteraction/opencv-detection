@@ -1,0 +1,110 @@
+---
+title: "ABC results"
+author: "David Mawdsley"
+date: "23 November 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(rpart)
+library(REEMtree)
+library(formula.tools)
+library(IDInteraction)
+library(party)
+library(sqldf)
+
+
+```
+
+## Introduction
+
+This document summarises the results of the ABC experiment, using both object tracking (via cpp-mt) and face detection (via OpenCV).   We begin by replicating the results of tables 1 and 2 from the paper (the accuracy of the full-face and eyes object tracking experiments).  For both we only consider all the data (i.e we don't distinguish between data categorised as "robust" or "glitches").  We then evaluate the performance of a recursive partitioning tree that uses both full-face and eye tracking data-sets   We then look how the face and eye detection data can be used either instead of, or in addition to the object tracking data.
+
+## Object tracking data
+
+```{r table1}
+load("../analysis/table1.RData")
+print(table1)
+```
+
+Note that we see small differences from the reported values; I'm not sure why this is.  TODO - check package versions in docker container vs my machine.  Have already checked tracking data-file and derived variables agree for P01 (TODO - check all participants)
+
+We obtain the following figures for table 2 (which uses the tighter bounding box around each participant's eyes)
+
+```{r table2}
+load("../analysis/table2.RData")
+print(table2)
+```
+
+*There are some small discrepancies between the published figures; need to check per-participant results with Aitor to get to the bottom of this*
+
+## Combined tracking data
+
+```{r}
+if(table1formula != table2formula){
+  stop("Different predictors used in tables 1 and 2 - assertion in text false")
+}
+
+load("../analysis/tableCombined.RData")
+
+```
+
+
+We can create a recursive partitioning tree using the bounding box information from both the full-face and eyes-only tracking data.  It's unclear how the covariates used in tables 1 and 2 (i.e. `r as.character(table1formula)`) were selected; for the combined analysis I used these covariates for both full-face and eyes-only tracking data (i.e. `r as.character(combinedformula)`).  This gave the following figures:
+```{r}
+print(tableCombined)
+```
+
+## Face detection data 
+
+We use the OpenCV face detection routine to detect the presence and location of faces in the video.  In contrast to the object-tracking process, which will always track *something*, the OpenCV routine may not detect any faces.  It may also detect more than 1 face; this was the case with 11 video frames in the whole experiement.  As a pragmatic, although non-ideal approach these frames were dropped from the analysis (In practice, on a two-faced frame it would be better to keep the face nearest the face that was detected on the previous one-faced frame). The table below shows the proportion of frames (after the experiment had started) in which a face was detected for each participant:
+
+```{r faceDetectionProp}
+participants <- getParticipantCodes("/mnt/IDInteraction/dual_screen_free_experiment/attention/")
+trainingtimes <- c(1,2,5,10)
+openCVFormula <- formula(attentionName ~ boxArea + boxXcoordRel + boxYcoordRel)
+allparticipantsOpenCV <- loadExperimentData(participants,
+                                            "~/opencv/abc-classifier/processall/",
+                                            "/mnt/IDInteraction/dual_screen_free_experiment/attention/",
+                                            trackingSuffix = "face.csv")
+
+
+detectedFrames <- as.vector(table(allparticipantsOpenCV$participantCode))
+skipTime <- sapply(participants, getSkipTime, skipLoc = "/mnt/IDInteraction/dual_screen_free_experiment/tracking/high_quality/front_full_face/")
+fps <- sapply(participants, getVideoFPS, vidLoc = "/mnt/IDInteraction/dual_screen_free_experiment/video/experiment2_individual_streams/high_quality/front/")
+totalFrames <- sapply(participants, getVideoFrames, vidLoc = "/mnt/IDInteraction/dual_screen_free_experiment/video/experiment2_individual_streams/high_quality/front/")
+
+detectedProp <- detectedFrames / (totalFrames - skipTime/fps)
+print(round(t(data.frame(as.list(detectedProp))),5))
+
+
+```
+
+We see that the face detection algorithm has essentially failed for participant 9.  In this video the sun is coming through a window to the side of the frame, putting the room and participant partially in shade and partially in sun.  In contrast to the other videos there is a much greater contrast between the light and dark regions of each frame.  We speculate this is what caused the face detection algorithm to fail.
+
+Since a face was only detected in `r detectedFrames[participants=="P09"]` frames for this participant, there is insufficient data to train the participant's classifer, so they were removed from the analysis in the analysis of the face-detection data
+
+```{r}
+load("../analysis/tableOpenCV.RData")
+
+```
+
+In contrast to the object-tracking data, the bounding-box returned is square, and has zero rotation.  This gives us three variables; x and y position and a variable repsresenting scale.  In common with the object-tracking work we normalise the x and y position data.  We use the following formula for the recursive partitioning tree: `r as.character(openCVFormula)`, and obtain the following accuracy figures:
+
+```{r}
+print(tableOpenCV)
+```
+
+Predictions are only made when a face has been detected.
+
+## Combining object-detection and object-tracking information
+
+The figure below shows the absolute difference, in pixels, between the centre of the face-detection bounding-box and the centre of the face-tracking bounding box, for each of the participants.  
+
+A recursive partitioning tree, using all of the covariates used in the face-tracking (`r as.character(rhs.vars(table1formula))`) and face-detection (`as.character(rhs.vars(openCVFormula)`) was used to 
+
+
+
+
+
