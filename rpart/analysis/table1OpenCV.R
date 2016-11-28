@@ -51,6 +51,6 @@ tableOpenCV<- sqldf("select trainingtime, avg(accuracy) as avgaccuracy
                        group by trainingtime")
 
 
-save(openCVFormula, tableOpenCV, file = "tableOpenCV.RData")
+save(openCVFormula, tableOpenCV, file = "table1OpenCV.RData")
 
 
