@@ -30,16 +30,16 @@ allparticipantsFF <- loadExperimentData(participants,
 )
 allparticipantsFF <- renameVariables(allparticipantsFF, prefix = "ff")
 
-allparticipantsEyes <- loadExperimentData(participants, 
+allparticipantsEyes <- loadExperimentData(participants,
                                           trackingLoc = "/mnt/IDInteraction/dual_screen_free_experiment/tracking/high_quality/front_eyes_only/",
                                           annoteLoc = "/mnt/IDInteraction/dual_screen_free_experiment/attention/"
 )
 
 allparticipantsEyes <- renameVariables(allparticipantsEyes, prefix = "eyes")
 
-combinedparticipants <- sqldf("select * 
-                               from allparticipantsEyes as e 
-                               natural join 
+combinedparticipants <- sqldf("select *
+                               from allparticipantsEyes as e
+                               natural join
                                allparticipantsFF as f")
 
 allresults <- NULL
@@ -54,7 +54,7 @@ for(p in participants){
                                    accuracy = accuracy)
     )
   }
-  
+
   #print(p)
 }
 
@@ -62,4 +62,4 @@ tableCombined <- sqldf("select trainingtime, avg(accuracy) as avgaccuracy
                        from allresults
                        group by trainingtime")
 
-save(tableCombined, combinedformula, file="tableCombined.RData")
+save(tableCombined, combinedformula, file="combinedFullFaceAndEyes.RData")

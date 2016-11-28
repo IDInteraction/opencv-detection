@@ -67,9 +67,8 @@ combinedparticipants$bbcdiff <- with(combinedparticipants,
 #   facet_wrap(~participantCode)
 
 
-trackDetectFormula <- attentionName ~ trackboxHeight +  trackboxRotation + 
-  trackboxArea + trackboxWidth + trackwidthHeightRatio + trackboxYcoordRel + 
-  detectboxArea + detectboxXcoordRel + detectboxYcoordRel
+trackDetectFormula <- attentionName ~ trackboxHeight + trackboxRotation + 
+  trackboxArea + trackboxWidth + trackwidthHeightRatio + trackboxYcoordRel +   detectboxArea + detectboxXcoordRel + detectboxYcoordRel
 
 
 allresults <- NULL
@@ -94,6 +93,6 @@ tableTrackDetect<- sqldf("select trainingtime, avg(accuracy) as avgaccuracy
                        group by trainingtime")
 
 
-save(tableTrackDetect, combinedparticipants, trackDetectFormula, file = "TrackDetect.RData")
+save(tableTrackDetect, combinedparticipants, trackDetectFormula, file = "compareBBoxes.RData")
 
 

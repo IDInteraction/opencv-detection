@@ -47,7 +47,7 @@ if(table1formula != table2formula){
   stop("Different predictors used in tables 1 and 2 - assertion in text false")
 }
 
-load("../analysis/tableCombined.RData")
+load("../analysis/combinedFullFaceAndEyes.RData")
 
 ```
 
@@ -87,7 +87,7 @@ We see that the face detection algorithm has essentially failed for participant 
 Since a face was only detected in `r detectedFrames[participants=="P09"]` frames for this participant, there is insufficient data to train the participant's classifer, so they were removed from the analysis in the analysis of the face-detection data
 
 ```{r}
-load("../analysis/tableOpenCV.RData")
+load("../analysis/table1OpenCV.RData")
 
 ```
 
@@ -104,7 +104,7 @@ Predictions are only made when a face has been detected.
 The figure below shows the absolute difference, in pixels, between the centre of the face-detection bounding-box and the centre of the face-tracking bounding box, for each of the participants.  
 
 ```{r}
-load("../analysis/TrackDetect.RData")
+load("../analysis/compareBBoxes.RData")
 
 ggplot(data=combinedparticipants,
        aes(x=timestampms, y=bbcdiff)) + geom_line() +
