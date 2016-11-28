@@ -30,45 +30,44 @@ allresults <- NULL
 allpredictions <- NULL
 for(p in participants){
   thisparticipant <- subset(allparticipants, allparticipants$participantCode == p)
-  
+
   for(tt in trainingtimes){
-    
-    
+
+
     thispred <- getPartitionPredictions(thisparticipant, tt, table1formula)
-    
+
     accuracy <- getAccuracy(getConfusionMatrixPreds(thispred))
-    
+
     modelpredictions  <- cbind(
-      traintime = tt, 
+      traintime = tt,
       thisparticipant[!flagtraining(thisparticipant, tt),
                       c("participantCode", "frame","timestampms")],
       thispred)
-    
+
     modelpredictions$numpredclass <- as.numeric(modelpredictions$predclass)
-    
+
     write.csv(modelpredictions[,c("traintime","participantCode",
                                  "frame", "timestampms",
                                  "predclass", "numpredclass")],
               file = paste0(p, "_", tt, "_", "predictions.csv"))
-    
-    allpredictions <- bind_rows(allpredictions,
+
+    allpredictions <- dplyr::bind_rows(allpredictions,
                             modelpredictions)
-    
-    
-    allresults <- rbind(allresults, 
+
+
+    allresults <- rbind(allresults,
                         data.frame(participantCode = p,
                                    trainingtime = tt,
                                    accuracy = accuracy))
-    
+
   }
-  
+
   print(p)
 }
 
-table1 <- sqldf("select trainingtime, avg(accuracy) as avgaccuracy 
+table1 <- sqldf("select trainingtime, avg(accuracy) as avgaccuracy
                        from allresults
                        group by trainingtime")
 
 table1predictions <- allpredictions
 save(table1, table1formula, table1predictions, file = "table1.RData")
-
