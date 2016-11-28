@@ -13,6 +13,7 @@ library(formula.tools)
 library(IDInteraction)
 library(party)
 library(sqldf)
+library(ggplot2)
 
 
 ```
@@ -102,7 +103,28 @@ Predictions are only made when a face has been detected.
 
 The figure below shows the absolute difference, in pixels, between the centre of the face-detection bounding-box and the centre of the face-tracking bounding box, for each of the participants.  
 
-A recursive partitioning tree, using all of the covariates used in the face-tracking (`r as.character(rhs.vars(table1formula))`) and face-detection (`as.character(rhs.vars(openCVFormula)`) was used to 
+```{r}
+load("../analysis/TrackDetect.RData")
+
+ggplot(data=combinedparticipants,
+       aes(x=timestampms, y=bbcdiff)) + geom_line() +
+  facet_wrap(~participantCode)
+
+
+ggplot(data=combinedparticipants[combinedparticipants$participantCode != "P10",],
+       aes(x=timestampms, y=bbcdiff)) + geom_line() +
+  facet_wrap(~participantCode)
+
+
+```
+
+
+A recursive partitioning tree, using all of the covariates used in the face-tracking and face-detection, (i.e. `r as.character(rhs.vars(trackDetectFormula))`) was used to predict attention using both face-tracking and face-detection information (where face-detection information is missing (i.e. no face was detected), rpart uses a surrogate variable approach, as described in the rpart documentation).  This gave the following accuracy figures:
+
+```{r}
+print(tableTrackDetect)
+```
+
 
 
 
