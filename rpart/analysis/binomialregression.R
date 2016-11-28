@@ -1,3 +1,25 @@
+# Explore using binomial regression instead of a recursive partitioning tree
+# Using the full-face data with object tracking
+
+library(rpart)
+library(REEMtree)
+library(formula.tools)
+library(IDInteraction)
+library(party)
+library(sqldf)
+rm(list=ls())
+
+
+participants <- getParticipantCodes("/mnt/IDInteraction/dual_screen_free_experiment/tracking/high_quality/front_full_face/")
+trainingtimes <- c(1,2,5,10)
+table1formula <- attentionName ~ boxHeight +  boxRotation + boxArea + boxWidth + widthHeightRatio + boxYcoordRel
+binomialRegressionFormula <- attentionIpad ~ boxHeight +   boxRotation +  boxWidth + widthHeightRatio + boxYcoordRel 
+
+allparticipants <- loadExperimentData(participants,
+                                      trackingLoc = "/mnt/IDInteraction/dual_screen_free_experiment/tracking/high_quality/front_full_face/",
+                                      annoteLoc = "/mnt/IDInteraction/dual_screen_free_experiment/attention/")
+
+
 
 
 # Remove elsewheres so we have binary outcome
@@ -9,15 +31,12 @@ allresults <- NULL
 for(p in participants){
   print(p)
   
-  
-  
   participantdata <- allparticipantsNoElsewhere[allparticipantsNoElsewhere$participantCode == p ,]
   
   for(tt in trainingtimes){
     
     #http://www.statmethods.net/advstats/glm.html
-    fitGlm <- glm(attentionIpad ~ ffboxHeight +   ffboxRotation +  
-                    ffboxWidth + ffwidthHeightRatio + ffboxYcoordRel ,
+    fitGlm <- glm(binomialRegressionFormula,
                   data=participantdata,
                   family=binomial,
                   subset = flagtraining(participantdata, tt)
@@ -49,12 +68,15 @@ for(p in participants){
  
 
  
-tableBiniomial <- sqldf("select trainingtime, avg(accuracy) as avgaccuracy
+tableBinomial <- sqldf("select trainingtime, avg(accuracy) as avgaccuracy
                        from allresults
                        group by trainingtime")
 
   
   
-  
+save(tableBinomial, 
+     binomialRegressionFormula,
+     trainingtimes,
+     file="binomialregression.RData")  
 
   

@@ -126,6 +126,24 @@ print(tableTrackDetect)
 ```
 
 
+## Binomial regression
+
+```{r}
+load("../analysis/binomialregression.RData")
+```
+
+
+The peformance of logistic regression was briefly investigated, using the full-face tracking data.  The following covariates were used:
+
+`r as.character(rhs.vars(binomialRegressionFormula))`
+
+Since we require a binary outcome, the observerations that were coded as "elsewhere" were dropped from the analysis.   As with the recursive partitioning approach, {`r trainingtimes`} minutes of data were used for each participant to train the model.   Predictions were then made for the remainder of each video.  
+
+The following accuracy figures were obtained:
+
+```{r}
+print(tableBinomial)
+```
 
 
 

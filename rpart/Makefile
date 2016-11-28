@@ -3,13 +3,18 @@
 
 writeupdir = writeups
 analysisdir = analysis
+analysisfiles = $(patsubst %, $(analysisdir)/%.RData, table1 table2 \
+	combinedFullFaceAndEyes table1OpenCV compareBBoxes binomialregression)
+
+# For debugging
+print-%: ; @echo $*=$($*)
 
 
-.PHONY: all knit data
+.PHONY: all knit 
 
 all: knit
 
-data: $(patsubst %, $(analysisdir)/%.RData, table1 table2 combinedFullFaceAndEyes table1OpenCV compareBBoxes)
+data: $(analysisfiles)
 
 # This tells us we *should* have a pdf for each Rmd.  Can't just use a wildcard
 # over all pdfs in the folder, since they won't exist the first time the
@@ -20,7 +25,7 @@ $(writeupdir)/%.pdf: $(writeupdir)/%.Rmd
 	$(info ************  CONVERTING KNITR TO PDF  ************)
 	Rscript -e "require(rmarkdown); render(input = '$<', output_format='pdf_document')"
 
-$(writeupdir)/writeup.Rmd: data
+$(writeupdir)/%.Rmd: data
 
 $(analysisdir)/%.RData: $(analysisdir)/%.R
 		cd $(analysisdir); Rscript $(subst .RData, .R, $(notdir $<))
