@@ -29,7 +29,6 @@ load("../analysis/table1.RData")
 print(table1)
 ```
 
-Note that we see small differences from the reported values; I'm not sure why this is.  TODO - check package versions in docker container vs my machine.  Have already checked tracking data-file and derived variables agree for P01 (TODO - check all participants)
 
 We obtain the following figures for table 2 (which uses the tighter bounding box around each participant's eyes)
 
@@ -38,7 +37,36 @@ load("../analysis/table2.RData")
 print(table2)
 ```
 
-*There are some small discrepancies between the published figures; need to check per-participant results with Aitor to get to the bottom of this*
+
+Note that we see small differences from the reported values; I'm not sure why this is.  TODO - check package versions in docker container vs my machine.  Have already checked tracking data-file and derived variables agree for P01 (TODO - check all participants)
+
+## Other tree-based methods
+
+```{r}
+load(file="../analysis/conditionalInferenceTrees.RData")
+load(file="../analysis/randomForests.RData")
+
+names(CITreeByTime) <- c("method","trainingtime","CondInf")
+names(RandForestBytimeresults) <- c("method", "trainingtime", "RandForest")
+
+CIandRFResults <- sqldf("select c.trainingtime as trainingtime,
+                        c.CondInf, r.RandForest
+                        from CITreeByTime as c
+                        inner join RandForestBytimeresults as r 
+                        on c.trainingtime = r.trainingtime")
+
+```
+
+
+In this section I briefly examine the accuracy of other tree-based approaches; using random forests (with the R package "randomForest") and conditional inference trees (using the R package "party").  In both cases the same covariates at table 1 were used (i.e. `r as.character(table1formula)`), with the full-face data.  The default options for both packages were used.  The accuracy of each method is shown below:
+
+```{r}
+print(CIandRFResults)
+```
+
+
+
+
 
 ## Combined tracking data
 
@@ -59,7 +87,7 @@ print(tableCombined)
 
 ## Face detection data 
 
-We use the OpenCV face detection routine to detect the presence and location of faces in the video.  In contrast to the object-tracking process, which will always track *something*, the OpenCV routine may not detect any faces.  It may also detect more than 1 face; this was the case with 11 video frames in the whole experiement.  As a pragmatic, although non-ideal approach these frames were dropped from the analysis (In practice, on a two-faced frame it would be better to keep the face nearest the face that was detected on the previous one-faced frame). The table below shows the proportion of frames (after the experiment had started) in which a face was detected for each participant:
+We use the OpenCV face detection routine to detect the presence and location of faces in the video.  In contrast to the object-tracking process, which will always track *something*, the OpenCV routine may not detect any faces.  It may also detect more than 1 face; this was the case with 11 video frames in the whole experiement.  As a pragmatic, although non-ideal approach, these frames were dropped from the analysis (In practice, on a two-faced frame it would be better to keep the face nearest the face that was detected on the previous one-faced frame). The table below shows the proportion of frames (after the experiment had started) in which a face was detected for each participant:
 
 ```{r faceDetectionProp}
 participants <- getParticipantCodes("/mnt/IDInteraction/dual_screen_free_experiment/attention/")
@@ -144,6 +172,14 @@ The following accuracy figures were obtained:
 ```{r}
 print(tableBinomial)
 ```
+
+
+### Future work
+
+* Re-calibrate object-tracking bounding box if it drifts from (detected) face
+* Explore fixed-effect binomial model with participant as covariate
+  + Explore multi-level models (may be tricky; early efforts very slow to fit)
+
 
 
 
