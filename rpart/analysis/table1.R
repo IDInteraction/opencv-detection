@@ -46,10 +46,10 @@ for(p in participants){
 
     modelpredictions$numpredclass <- as.numeric(modelpredictions$predclass)
 
-#    write.csv(modelpredictions[,c("traintime","participantCode",
-#                                 "frame", "timestampms",
-#                                 "predclass", "numpredclass")],
-#              file = paste0(p, "_", tt, "_", "predictions.csv"))
+   write.csv(modelpredictions[,c("traintime","participantCode",
+                                "frame", "timestampms",
+                                "predclass", "numpredclass")],
+             file = paste0(p, "_", tt, "_", "predictions.csv"))
 
     allpredictions <- dplyr::bind_rows(allpredictions,
                             modelpredictions)
