@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-#  Convert data of the form 
+#  Convert data of the form
 # fame, x, y, w, h
 # to the format used by CppMT
 
@@ -19,8 +19,13 @@ message(getwd())
 
 source("./opencv/abc-classifier/Ranalysis/functions.R")
 
+info = file.info(args[1])
+
+if(info$size >0){
+
 indata <- readfeature(args[1])
 
 generateCppMTcsv(indata, args[2])
-
-
+}else{
+  print("Input file of size 0; not processing")
+}
