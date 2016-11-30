@@ -44,13 +44,9 @@ getmidpoint <- function(indata){
 
 
 getMultiFaceFrames <- function(framedata){
-  # multiface <- sqldf::sqldf("select Frame, count(*)
-  #                           from framedata
-  #                           group by Frame
-  #                           having count(*) >1")$Frame
 
-  freqtab <- as.data.frame(table(framedata$Frame))
-  multiface <- as.integer(freqtab[freqtab$Freq > 1 , 1])
+  multiface <- framedata[duplicated(framedata$Frame), "Frame"]
+
   return(multiface)
 
 }
@@ -92,11 +88,12 @@ generateCppMTcsv <- function(indata, outfile, deltaframe = 20 ){
   colnames(outdata) <- colnames
 
   twofaced <- getMultiFaceFrames(outdata)
-
+  print("multi-object frames")
+  print(twofaced)
   # TODO handle these better; ideally want to keep the face nearest the face on the
   # previous frame
   if(length(twofaced) > 0){
-    warning(paste(length(twofaced), "frames with >1 face detected.  Dropping all faces from these frames"))
+    warning(paste(length(twofaced), "frames with >1 object detected.  Dropping all faces from these frames"))
     outdata <- outdata[-which(outdata$Frame %in% twofaced), ]
   }
 
