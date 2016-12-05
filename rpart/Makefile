@@ -13,7 +13,8 @@ all: knit
 
 data: $(patsubst %, $(analysisdir)/%.RData, table1 table2 \
 	combinedFullFaceAndEyes table1OpenCV compareBBoxes binomialregression \
-	randomForests conditionalInferenceTrees)
+	randomForests conditionalInferenceTrees \
+	table1SetBB table1OpenCVBB)
 
 # This tells us we *should* have a pdf for each Rmd.  Can't just use a wildcard
 # over all pdfs in the folder, since they won't exist the first time the

@@ -174,6 +174,40 @@ print(tableBinomial)
 ```
 
 
+## Other approaches to setting the initial bounding box
+
+In this section I consider two approaches to setting the initial bounding box at the start of the experiment.   In both cases, the face is selected / detected _after_ the experiment has started.  The bounding box at the start of the experiment is determined by running the object tracking algorithm on a reversed copy of the video, to extapolate to a bounding box at the expetiments start.
+
+In the first approach the user selects the initial bounding box, but using a less formal criterion than the technique used in the paper (which defined the box at the experiment start, $t_\mathrm{start})$.  Instead, the video is played frame-by-frame from $t_\mathrm{start}$ until the pariticpant looks directly at the camera, with their face unobscured,  approximately vertical and approximately stationary.   The bounding box was then drawn to encompass the paricipants eyes, nose and mouth.  
+
+The second approach uses OpenCV's face detection algorithm to determine the first frame after $t_\mathrm{start}$ in which a face can be detected. 
+
+In both cases the bounding box at $t\geq t_\mathrm{start}$ is extrapolated back to $t_\mathrm{start}$ by applying the object tracking routine to the video frames $t_\mathrm{face} \leq t_\mathrm{start}$.  The bounding box at $t_\mathrm{start}$ is then used in the processing pipeline used in the paper.
+
+The table below shows the accuracy of the paper's approach to defining the bounding box, and each of the methods described above:
+
+```{r}
+rm(list=ls())
+load("../analysis/table1.RData")
+load("../analysis/table1SetBB.RData")
+load("../analysis/table1OpenCVBB.RData")
+
+sqldf("select a.trainingtime, a.avgaccuracy as PaperAccuracy,
+      b.avgaccuracy as OpenCVBoundingBox,
+      c.avgaccuracy as ManualBB
+      from table1 as a
+      inner join
+      table1OpenCVBB as b on a.trainingtime=b.trainingtime
+      inner join
+      table1SetBB as c on a.trainingtime=c.trainingtime
+    
+      ")
+
+```
+
+
+
+
 ### Future work
 
 * Re-calibrate object-tracking bounding box if it drifts from (detected) face
