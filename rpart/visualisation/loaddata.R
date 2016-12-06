@@ -1,5 +1,6 @@
 library(ggplot2)
 library(stringr)
+library(sqldf)
 rm(list=ls())
 load("../analysis/table1.RData")
 load("../analysis/table1SetBB.RData")
