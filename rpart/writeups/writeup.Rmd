@@ -205,6 +205,75 @@ sqldf("select a.trainingtime, a.avgaccuracy as PaperAccuracy,
 
 ```
 
+We can examine the relative performance of each method on a per-participant per training time basis:
+
+```{r}
+
+comparepredictions <- sqldf("select a.traintime, a.participantCode, a.frame,
+                            a.observedAttentionName, a.predclass as origPred,
+                            b.predclass as OpenCVPred,
+                            c.predclass as SetBBPred
+                            from  table1predictions as a 
+                            inner join 
+                            table1predictionsOpenCVBB as b
+                            on a.traintime = b.traintime and
+                            a.participantCode = b.participantCode and
+                            a.frame = b.frame
+                            inner join 
+                            table1predictionsSetBB as c
+                            on a.traintime = c.traintime and
+                            a.participantCode = c.participantCode and
+                            a.frame = c.frame
+                            ")
+
+factlevs <- levels(comparepredictions$observedAttentionName)
+
+factorpred <- function(chrvar, levels){
+  return(factor(chrvar, levels))
+}
+
+
+comparepredictions$origPred <- factorpred(comparepredictions$origPred, factlevs)
+comparepredictions$OpenCVPred <- factorpred(comparepredictions$OpenCVPred, factlevs)
+comparepredictions$SetBBPred <- factorpred(comparepredictions$SetBBPred, factlevs)
+
+accuracyresults <- NULL
+bbmethods <- c("origPred", "OpenCVPred", "SetBBPred")
+
+for(tt in unique(comparepredictions$traintime)){
+  
+  thistimepreds <- comparepredictions[comparepredictions$traintime == tt,]
+  
+  splitpreds <- split(thistimepreds, thistimepreds$participantCode)
+  
+  for(bbm in bbmethods){
+    participantAccuracy <- lapply(splitpreds, 
+                                  function(x){
+                                    getAccuracy(table(x$observedAttentionName, 
+                                                      x[,bbm]))}
+    )
+    
+    accuracyresults <- rbind(accuracyresults,
+                             data.frame(tt=tt,
+                                        bbm=bbm,
+                                        participantCode=names(participantAccuracy),
+                                        accuracy=t(data.frame(participantAccuracy))
+                             )
+    )
+  }
+}
+
+# get colours same as videos
+accuracyresults$bbm <- factor(accuracyresults$bbm, 
+                             levels=bbmethods[c(2,3,1)])
+
+
+ggplot(data=accuracyresults, aes(x=tt, y=accuracy, colour = bbm)) +
+  geom_line() + geom_point() + facet_wrap( ~ participantCode) + theme_bw()
+
+
+```
+
 
 
 
@@ -212,7 +281,7 @@ sqldf("select a.trainingtime, a.avgaccuracy as PaperAccuracy,
 
 * Re-calibrate object-tracking bounding box if it drifts from (detected) face
 * Explore fixed-effect binomial model with participant as covariate
-  + Explore multi-level models (may be tricky; early efforts very slow to fit)
++ Explore multi-level models (may be tricky; early efforts very slow to fit)
 
 
 
