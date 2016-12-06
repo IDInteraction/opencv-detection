@@ -30,6 +30,7 @@ annoteloc = cloptions[2]
 trackingloc = cloptions[3]
 trainingtime = as.numeric(cloptions[4])
 predmethod = cloptions[5]
+outfile = cloptions[6]
 
 if(predmethod != "rpart"){
   stop("Only recursive partioning trees implemented so far")
@@ -66,7 +67,7 @@ for(p in participant){
    write.csv(modelpredictions[,c("traintime","participantCode",
                                 "frame", "timestampms",
                                 "predclass", "numpredclass")],
-             file = paste0(p, "_", tt, "_", "predictions.csv"))
+             file = outfile)
 
 
 
