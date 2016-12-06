@@ -15,25 +15,26 @@ fluidPage(
   
   titlePanel("Prediction comparison"),
   
-  sidebarLayout(
-    sidebarPanel(
-      selectInput("participant", label=h3("Select participant"),
-                  choices = participantlist),
-      
-      br(),
-      
-      selectInput("traintime", label=h3("Select training time"),
-                  choices = trainingTimesList),
-      
-      br(),
-      
-      sliderInput("frames", label=h3("Select proportion"),
-                  min = 1, max= 100, value=c(0,100))
-    ),
+  verticalLayout(
+
     
-    mainPanel(
-      plotOutput("plot")
-    )
+    
+      plotOutput("plot"),
+      wellPanel(
+        selectInput("participant", label=h3("Select participant"),
+                    choices = participantlist),
+        
+        br(),
+        
+        selectInput("traintime", label=h3("Select training time"),
+                    choices = trainingTimesList),
+        
+        br(),
+        
+        sliderInput("frames", label=h3("Select proportion"),
+                    min = 1, max= 100, value=c(0,100))
+      )
+    
     
   )
 )
