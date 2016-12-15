@@ -6,41 +6,41 @@ import csv
 import sys
 
 
-#WINDOW_NAME = 'Detection'
+WINDOW_NAME = 'Detection'
 
 
-face_cascade = cv2.CascadeClassifier('/usr/share/opencv/haarcascades/haarcascade_frontalface_alt2.xml')
-#face_cascade = cv2.CascadeClassifier('/usr/share/opencv/lbpcascades/lbpcascade_frontalface.xml')
-#eye_cascade = cv2.CascadeClassifier('/usr/share/opencv/haarcascades/haarcascade_eye.xml')
-#eye_cascade = cv2.CascadeClassifier('/usr/share/opencv/haarcascades/haarcascade_eye_tree_eyeglasses.xml')
-eye_cascade = cv2.CascadeClassifier('/usr/share/opencv/haarcascades/haarcascade_mcs_eyepair_small.xml')
-#video = cv2.VideoCapture('/opt/windows/idi-test/star_jump.mp4')
-#video = cv2.VideoCapture('/mnt/IDInteraction/dual_screen_free_experiment/video/experiment2_individual_streams/high_quality/front/P01_video.mp4')
+cascadeFolder = '/usr/share/opencv/haarcascades/'
 
-print sys.argv[1:3]
+face_cascades_files = ['haarcascade_frontalface_default.xml', \
+                'haarcascade_frontalface_alt.xml', \
+                'haarcascade_frontalface_alt2.xml', \
+                'haarcascade_frontalface_alt_tree.xml' ]
+
+face_cascades_colours = [(255,0,0), (0,255,0), (0,0,255), (255,255,255)]
+
+cascadeClassifiers = list()
+
+for c in face_cascades_files:
+    classifier = cv2.CascadeClassifier(cascadeFolder + c)
+    if classifier.empty():
+        print  "Could not load classifier: " + cascadeFolder + c
+        quit()
+    cascadeClassifiers.append(classifier)
+
+
+print "loaded " + str(len(cascadeClassifiers)) + " cascade classifiers"
 
 video = cv2.VideoCapture(sys.argv[1])
 
-#cv2.namedWindow(WINDOW_NAME)
+cv2.namedWindow(WINDOW_NAME)
 
 facecsvfile = open(sys.argv[2], 'w')
 facewriter = csv.writer(facecsvfile)
 
-eyecsvfile = open(sys.argv[3], 'w')
-eyewriter = csv.writer(eyecsvfile)
 
-frame = 0
-
-if(len(sys.argv)==5):
-    skipfile = open(sys.argv[4], 'r')
-    skiptime = int(skipfile.readline())
-    skipframe = skiptime / 20 # TODO - don't hard code
-    got, img = video.read()
-    while got:
-        frame = frame + 1
-        got, img = video.read()
-        if(frame > skipframe):
-            break
+if(len(sys.argv)==4):
+    print >> sys.stderr, ("Skipping " + sys.argv[3] + " ms")
+    video.set(cv2.cv.CV_CAP_PROP_POS_MSEC, int(sys.argv[3]))
 
 
 got, img = video.read()
@@ -51,30 +51,26 @@ ow, oh, _ = img.shape
 
 while got:
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    gray_sm = gray[oy:oh, ox:ow]
-    #print gray_sm.shape
-    frame = frame + 1
-    print frame
 
-    faces = face_cascade.detectMultiScale(gray_sm, 1.3, 5)
-    for (x, y, w, h) in faces:
-        x_w = x + w
-        y_h = y + h
-        cv2.rectangle(img, (x, y), (x_w, y_h), (255, 0, 0), 1)
-        roi_gray = gray[y:y_h, x:x_w]
+    # from facedetect.py example TODO - try this
+    gray = cv2.equalizeHist(gray)
 
-        facewriter.writerow([frame, x, y, w, h])
+    frame = video.get(cv2.cv.CV_CAP_PROP_POS_FRAMES)
 
-        eyes = eye_cascade.detectMultiScale(roi_gray)
+    for (cc, cf, bc) in zip(cascadeClassifiers, face_cascades_files, face_cascades_colours):
+        faces = cc.detectMultiScale(gray, 1.3, 5)
+        for (x, y, w, h) in faces:
+            x_w = x + w
+            y_h = y + h
+            cv2.rectangle(img, (x, y), (x_w, y_h), bc, 1)
+            roi_gray = gray[y:y_h, x:x_w]
 
-        for (ex, ey, ew, eh) in eyes:
-            cv2.rectangle(img, (x + ex, y + ey), (x + ex + ew, y + ey + eh), (0, 255, 0), 1)
-            eyewriter.writerow([frame, x + ex, y + ey, ew, eh])
+            facewriter.writerow([frame, x, y, w, h, cf])
 
-#    cv2.imshow(WINDOW_NAME, img)
+    cv2.imshow(WINDOW_NAME, img)
 
-#      if cv2.waitKey(1) & 0xFF == ord('q'):
-#        break
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
 
     got, img = video.read()
 
