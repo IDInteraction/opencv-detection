@@ -28,10 +28,11 @@ outfile = sys.argv[2]
 print "Reading from: " + infile
 print "Outputting to: " + outfile
 
+# TODO get datatypes working in docker container
 boxdata = pd.read_csv(infile, sep = ",", header = None, \
-    names = ["frame", "x","y","w","h","classifier"], \
-    dtype = {'frame':np.int32, 'x':np.float_, 'y':np.float_, 'w':np.float_, \
-    'h':np.float_})
+    names = ["frame", "x","y","w","h","classifier"]) #, \
+    #dtype = {'frame':np.int32, 'x':np.float_, 'y':np.float_, 'w':np.float_, \
+    #'h':np.float_})
 
 grouped = boxdata[['x', 'y', 'w', 'h']].groupby(boxdata['frame'])
 
