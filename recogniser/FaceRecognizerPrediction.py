@@ -19,6 +19,8 @@ import cv2
 import pandas as pd
 import numpy as np
 import sys
+import time
+start_time = time.time()
 
 WINDOW_NAME = "FaceClassify"
 
@@ -94,7 +96,7 @@ training_data_labels = []
 
 test_data = []
 test_data_labels = []
-
+print "Loading data"
 while got:
 
     bbox = boundingboxes.ix[boundingboxes.frame == frame]
@@ -116,6 +118,7 @@ while got:
     frametime = video.get(cv2.cv.CV_CAP_PROP_POS_MSEC)
 
 print("Loaded data")
+print("--- %s seconds ---" % (time.time() - start_time))
 
 
 # Need to make all the images the same size.
@@ -128,15 +131,22 @@ maxtest = max(img.shape for img in test_data)
 print maxtrain
 print maxtest
 
+
 scaled_images = scale_images(training_data, max(maxtrain, maxtest))
 tdl = np.asarray(training_data_labels).astype("int")
+print "Scaled data"
+print("--- %s seconds ---" % (time.time() - start_time))
+
 
 print "Training classifier"
 facerecog.train(scaled_images, tdl)
 
 predictions = []
 confidences = []
+print "Trained classifier with " + str(len(scaled_images)) + " frames"
+print np.bincount(tdl)
 
+print("--- %s seconds ---" % (time.time() - start_time))
 print "Predicting"
 for img, truth in zip(test_data, test_data_labels):
     pred, conf = facerecog.predict(img)
@@ -149,3 +159,6 @@ d = {'truth' : test_data_labels, \
 
 results = pd.DataFrame(d)
 results.to_csv(outfile)
+
+print "All done"
+print("--- %s seconds ---" % (time.time() - start_time))
