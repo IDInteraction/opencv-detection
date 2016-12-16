@@ -41,23 +41,37 @@ def scale_images(images, scaleto):
 
     return scaled_images
 
-cv2.namedWindow(WINDOW_NAME)
+#cv2.namedWindow(WINDOW_NAME)
 
-# TODO Will need to compare performance of the various FaceRecognizers
-
-facerecog = cv2.createLBPHFaceRecognizer()
 
 video = cv2.VideoCapture(sys.argv[1])
 boundingboxes = pd.read_csv(sys.argv[2], sep = ",")
 groundtruth = pd.read_csv(sys.argv[3], sep = ",", \
         names = ["ms", "ipad", "tv", "elsewhere", "attentionlocation"], \
         skiprows = 1)
+skiptime = int(sys.argv[4]) # in ms
+trainingtime_min = float(sys.argv[5]) # In minutes.  FROM EXPRIMENT TIME
+classifier = sys.argv[6]
+outfile = sys.argv[7]
+# Make groundtruth attention categorial and get numerical equivalent
+# (need ints for OpenCV interface)
 groundtruth['attentionlocation'] = groundtruth['attentionlocation'].astype('category')
 groundtruth['attentionnum'] = groundtruth['attentionlocation'].cat.codes
 
 
-skiptime = int(sys.argv[4]) # in ms
-trainingtime_min = float(sys.argv[5]) # In minutes.  FROM EXPRIMENT TIME
+
+# TODO Will need to compare performance of the various FaceRecognizers
+
+if classifier == "LBPH":
+    facerecog = cv2.createLBPHFaceRecognizer()
+elif classifier == "Eigen":
+    facerecog = cv2.createEigenFaceRecognizer(num_components=60)
+elif classifier == "Fisher":
+    facerecog == cv2.createFisherFaceRecognizer(0)
+else:
+    print "Unrecognised FaceRecognizer: " + classifier
+    quit()
+
 
 # Get training time on same timeline and units as video
 trainingtime = trainingtime_min*60*1000 + skiptime
@@ -134,4 +148,4 @@ d = {'truth' : test_data_labels, \
     'confidence' : confidences}
 
 results = pd.DataFrame(d)
-results.to_csv("Predictions_lpbh.csv")
+results.to_csv(outfile)
