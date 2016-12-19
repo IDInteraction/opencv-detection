@@ -69,7 +69,7 @@ if classifier == "LBPH":
 elif classifier == "Eigen":
     facerecog = cv2.createEigenFaceRecognizer(num_components=60)
 elif classifier == "Fisher":
-    facerecog == cv2.createFisherFaceRecognizer(0)
+    facerecog = cv2.createFisherFaceRecognizer(0)
 else:
     print "Unrecognised FaceRecognizer: " + classifier
     quit()
