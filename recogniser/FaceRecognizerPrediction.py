@@ -132,18 +132,21 @@ print maxtrain
 print maxtest
 
 
-scaled_images = scale_images(training_data, max(maxtrain, maxtest))
+training_data = scale_images(training_data, max(maxtrain, maxtest))
 tdl = np.asarray(training_data_labels).astype("int")
+
+test_data = scale_images(test_data, max(maxtrain, maxtest))
+
 print "Scaled data"
 print("--- %s seconds ---" % (time.time() - start_time))
 
 
 print "Training classifier"
-facerecog.train(scaled_images, tdl)
+facerecog.train(training_data, tdl)
 
 predictions = []
 confidences = []
-print "Trained classifier with " + str(len(scaled_images)) + " frames"
+print "Trained classifier with " + str(len(training_data)) + " frames"
 print np.bincount(tdl)
 
 print("--- %s seconds ---" % (time.time() - start_time))
