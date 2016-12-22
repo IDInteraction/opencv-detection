@@ -4,7 +4,7 @@ import cv2
 import os
 import csv
 import sys
-
+import pandas as pd
 
 WINDOW_NAME = 'Detection'
 
@@ -15,6 +15,8 @@ face_cascades_files = ['haarcascade_frontalface_default.xml', \
                 'haarcascade_frontalface_alt.xml', \
                 'haarcascade_frontalface_alt2.xml', \
                 'haarcascade_frontalface_alt_tree.xml' ]
+
+cols = ["frame", "x", "y", "w", "h", "cf"]
 
 face_cascades_colours = [(255,0,0), (0,255,0), (0,0,255), (255,255,255)]
 
@@ -34,9 +36,6 @@ video = cv2.VideoCapture(sys.argv[1])
 
 cv2.namedWindow(WINDOW_NAME)
 
-facecsvfile = open(sys.argv[2], 'w')
-facewriter = csv.writer(facecsvfile)
-
 
 if(len(sys.argv)==4):
     print >> sys.stderr, ("Skipping " + sys.argv[3] + " ms")
@@ -48,6 +47,8 @@ ox = 0
 oy = 0
 ow, oh, _ = img.shape
 #print ox, oy, ow, oh
+
+results = []
 
 while got:
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -65,7 +66,8 @@ while got:
             cv2.rectangle(img, (x, y), (x_w, y_h), bc, 1)
             roi_gray = gray[y:y_h, x:x_w]
 
-            facewriter.writerow([frame, x, y, w, h, cf])
+            results.append((frame, x, y, w, h, cf))
+
 
     cv2.imshow(WINDOW_NAME, img)
 
@@ -74,6 +76,11 @@ while got:
 
     got, img = video.read()
 
+
+
+
+pdresults = pd.DataFrame(results )
+
+pdresults.to_csv(sys.argv[2], index=False, header=False )
 video.release()
 cv2.destroyAllWindows()
-facecsvfile.close()
