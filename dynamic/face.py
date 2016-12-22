@@ -5,9 +5,33 @@ import os
 import csv
 import sys
 import pandas as pd
+import numpy as np
 
 WINDOW_NAME = 'Detection'
 
+
+def deDuplicate(dupbox, history):
+
+    colnames = ['frame', 'x', 'y','w', 'h', 'classifier']
+    historydf = pd.DataFrame(history, columns = colnames )
+    historydf.cx = historydf.x + historydf.w/2
+    historydf.cy = historydf.y + historydf.h/2
+
+    centrex = np.mean(historydf.cx)
+    centrey = np.mean(historydf.cy)
+
+
+    dupboxdf = pd.DataFrame(dupbox, columns = ['x','y','w','h'])
+
+    dupboxdf['cx'] = dupboxdf.x + dupboxdf.w/2
+    dupboxdf['cy'] = dupboxdf.y + dupboxdf.h/2
+
+
+    dupboxdf['dist'] = ((dupboxdf.cx - centrex)**2 + \
+                         (dupboxdf.cy - centrey)**2)**(0.5)
+    mins = dupboxdf.dist.idxmin(axis =1)
+
+    return [dupbox[mins,]]
 
 cascadeFolder = '/usr/share/opencv/haarcascades/'
 
@@ -60,6 +84,9 @@ while got:
 
     for (cc, cf, bc) in zip(cascadeClassifiers, face_cascades_files, face_cascades_colours):
         faces = cc.detectMultiScale(gray, 1.3, 5)
+        if len(faces) > 1:
+            # Deal with duplicate face detection
+            faces = deDuplicate(faces, results)
         for (x, y, w, h) in faces:
             x_w = x + w
             y_h = y + h
