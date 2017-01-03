@@ -45,6 +45,7 @@ def scale_images(images, scaleto):
 
 #cv2.namedWindow(WINDOW_NAME)
 
+failureframes = 0
 
 video = cv2.VideoCapture(sys.argv[1])
 boundingboxes = pd.read_csv(sys.argv[2], sep = ",")
@@ -106,12 +107,16 @@ while got:
 #        if cv2.waitKey(1) & 0xFF == ord('q'):
 #            break
         grey = cv2.equalizeHist(cv2.cvtColor(face, cv2.COLOR_BGR2GRAY))
-        if frametime <= trainingtime:
-            training_data.append(grey)
-            training_data_labels.append(get_attention(frametime, groundtruth))
+        if not type(grey) is np.ndarray:
+            print "Invalid bbox at frame " + str(frame)
+            failureframes = failureframes + 1
         else:
-            test_data.append(grey)
-            test_data_labels.append(get_attention(frametime, groundtruth))
+            if frametime <= trainingtime:
+                training_data.append(grey)
+                training_data_labels.append(get_attention(frametime, groundtruth))
+            else:
+                test_data.append(grey)
+                test_data_labels.append(get_attention(frametime, groundtruth))
 
     got, img = video.read()
     frame = video.get(cv2.cv.CV_CAP_PROP_POS_FRAMES)
@@ -165,3 +170,4 @@ results.to_csv(outfile)
 
 print "All done"
 print("--- %s seconds ---" % (time.time() - start_time))
+print str(failureframes) + "frames had bboxes that couldn't be used"
