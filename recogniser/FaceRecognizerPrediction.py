@@ -97,6 +97,7 @@ training_data_labels = []
 
 test_data = []
 test_data_labels = []
+test_data_frames = []
 print "Loading data"
 while got:
 
@@ -117,6 +118,7 @@ while got:
             else:
                 test_data.append(grey)
                 test_data_labels.append(get_attention(frametime, groundtruth))
+                test_data_frames.append(int(frame))
 
     got, img = video.read()
     frame = video.get(cv2.cv.CV_CAP_PROP_POS_FRAMES)
@@ -161,7 +163,8 @@ for img, truth in zip(test_data, test_data_labels):
     predictions.append(pred)
     confidences.append(conf)
 
-d = {'truth' : test_data_labels, \
+d = {'frame' : test_data_frames, \
+    'truth' : test_data_labels, \
     'pred' : predictions, \
     'confidence' : confidences}
 
